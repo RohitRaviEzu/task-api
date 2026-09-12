@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from typing import List
 
 from fastapi import FastAPI, Depends, HTTPException
@@ -6,18 +7,24 @@ from sqlalchemy.orm import Session
 from app import models, schemas, crud
 from app.database import engine, get_db
 
-# NOTE: create_all() is a beginner-friendly shortcut for local development.
-# We replace this with Alembic migrations in Part 11 -- this line is exactly
-# the kind of "just change the schema and hope for the best" approach that
-# does NOT work once you have a real production database.
-models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Task Management API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Runs once when uvicorn actually starts serving requests -- not when
+    # this module is merely imported (e.g. by pytest during test collection).
+    models.Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(title="Task Management API", lifespan=lifespan)
 
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+# ... rest of your routes stay exactly as they are
 
 
 @app.get("/tasks", response_model=List[schemas.TaskOut])
