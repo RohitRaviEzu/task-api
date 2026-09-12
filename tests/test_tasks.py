@@ -1,14 +1,20 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app.main import app
 from app.database import Base, get_db
 
-# Tests use a throwaway in-memory SQLite database. This means "pytest" never
-# needs a running Postgres server -- important later when GitHub Actions
-# runs these same tests in a clean environment with no database attached.
-engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+# StaticPool forces every connection request to reuse the same single
+# underlying SQLite connection, regardless of which thread asks for it.
+# Without this, FastAPI's thread-pooled request handling and this test's
+# setup code end up talking to two different, empty in-memory databases.
+engine = create_engine(
+    "sqlite:///:memory:",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
 
