@@ -10,9 +10,7 @@ from app.database import engine, get_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Runs once when uvicorn actually starts serving requests -- not when
-    # this module is merely imported (e.g. by pytest during test collection).
-    models.Base.metadata.create_all(bind=engine)
+    # Schema is now managed by Alembic migrations, not created here.
     yield
 
 

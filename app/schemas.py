@@ -6,6 +6,7 @@ class TaskBase(BaseModel):
     title: str
     description: Optional[str] = None
     completed: bool = False
+    priority: Optional[int] = None
 
 
 class TaskCreate(TaskBase):
@@ -16,6 +17,7 @@ class TaskUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     completed: Optional[bool] = None
+    priority: Optional[int] = None
 
 
 class TaskOut(TaskBase):

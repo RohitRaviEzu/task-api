@@ -9,3 +9,4 @@ class Task(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     completed = Column(Boolean, default=False)
+    priority = Column(Integer, nullable=True)  # new — nullable, so old rows are still valid
